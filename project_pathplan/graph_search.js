@@ -54,7 +54,7 @@ function initSearchGraph() {
     }
   }
 }
-
+counter = 0;
 function iterateGraphSearch() {
   // STENCIL: implement a single iteration of a graph search algorithm
   //   for A-star (or DFS, BFS, Greedy Best-First)
@@ -71,15 +71,9 @@ function iterateGraphSearch() {
   //   drawHighlightedPathGraph - draws a path back to the start location
   //   draw_2D_configuration - draws a square at a given location
 
-  current_node = visit_queue.pop();
-  //current_node = minheap_extract(visit_queue)
-  console.log(
-    testCollision([
-      G[current_node.i][current_node.j].x,
-      G[current_node.i][current_node.j].y,
-    ]),
-    G[current_node.i][current_node.j]
-  );
+  current_node = minheap_extract(visit_queue);
+  counter = counter + 1;
+
   G[current_node.i][current_node.j].visited = true;
 
   adjacent = [
@@ -91,13 +85,14 @@ function iterateGraphSearch() {
 
   adjacent.forEach((element) => {
     if (!element.queued && !testCollision([element.x, element.y])) {
-      visit_queue.push(element);
-
       element.queued = true;
       if (element.distance > G[current_node.i][current_node.j].distance + eps) {
         element.parent = G[current_node.i][current_node.j];
         element.distance = G[current_node.i][current_node.j].distance + eps;
+        element.priority = element.distance + line_distance(element, G[60][60]);
         element.visited = true;
+        minheap_insert(visit_queue, element);
+        console.log("Counter:", counter, line_distance(element, G[60][60]));
       }
     }
   });
@@ -135,7 +130,8 @@ function minheap_insert(heap, new_element) {
 
   heap.push(new_element);
 
-  var heaped = elem_index <= 0 || heap[parent_index] < heap[elem_index];
+  var heaped =
+    elem_index <= 0 || heap[parent_index].priority < heap[elem_index].priority;
 
   while (!heaped) {
     var temp = heap[parent_index];
@@ -145,7 +141,9 @@ function minheap_insert(heap, new_element) {
     elem_index = parent_index;
     parent_index = Math.floor((elem_index - 1) / 2);
 
-    var heaped = elem_index <= 0 || heap[parent_index] < heap[elem_index];
+    var heaped =
+      elem_index <= 0 ||
+      heap[parent_index].priority < heap[elem_index].priority;
   }
 }
 function minheap_extract(heap) {
@@ -157,7 +155,7 @@ function minheap_extract(heap) {
     return heap.pop();
   }
 
-  var min_num = heap[0];
+  var min_element = heap[0];
 
   heap[0] = heap.pop();
 
@@ -171,10 +169,10 @@ function minheap_extract(heap) {
     var left = 2 * smallest + 1;
     var right = 2 * smallest + 2;
 
-    if (left < heap.length && heap[left] < heap[smallest]) {
+    if (left < heap.length && heap[left].priority < heap[smallest].priority) {
       smallest = left;
     }
-    if (right < heap.length && heap[right] < heap[smallest]) {
+    if (right < heap.length && heap[right].priority < heap[smallest].priority) {
       smallest = right;
     }
 
@@ -188,5 +186,13 @@ function minheap_extract(heap) {
     }
   }
 
-  return min_num;
+  return min_element;
+}
+
+//////////////////////////////////////////////////
+/////     Line Distance Function
+//////////////////////////////////////////////////
+
+function line_distance(element, goalNode) {
+  return Math.abs(element.x - goalNode.x) + Math.abs(element.y - goalNode.y);
 }
