@@ -59,7 +59,7 @@
         pendulum = {
           length: 2.0,
           mass: 2.0,
-          angle: Math.PI / 2,
+          angle: Math.PI / 8,
           angle_dot: 0.0,
           angle_previous: 0.0,
         };
@@ -163,7 +163,7 @@
         } else servo_active_state = "active";
 
         pendulum.angle_dot_dot = pendulum_acceleration(pendulum, gravity);
-        console.log(pendulum.angle);
+
         pendulum = update_pendulum_state(
           numerical_integrator,
           pendulum,

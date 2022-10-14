@@ -39,9 +39,10 @@ function update_pendulum_state(numerical_integrator, pendulum, dt, gravity) {
   } else if (numerical_integrator === "runge-kutta") {
     // STENCIL: Runge-Kutta 4 integrator
   } else {
+    /*
     pendulum.angle_previous = pendulum.angle;
     pendulum.angle = (pendulum.angle + Math.PI / 180) % (2 * Math.PI);
-    pendulum.angle_dot = (pendulum.angle - pendulum.angle_previous) / dt;
+    pendulum.angle_dot = (pendulum.angle - pendulum.angle_previous) / dt;*/
     numerical_integrator = "none";
   }
 
@@ -50,7 +51,10 @@ function update_pendulum_state(numerical_integrator, pendulum, dt, gravity) {
 
 function pendulum_acceleration(pendulum, gravity) {
   // STENCIL: return acceleration(s) system equation(s) of motion
-  return -(gravity / pendulum.length) * Math.sin(pendulum.angle);
+  return (
+    -(gravity / pendulum.length) * Math.sin(pendulum.angle) +
+    pendulum.control / (pendulum.mass * pendulum.length * pendulum.length)
+  );
 }
 
 function init_verlet_integrator(pendulum, t, gravity) {
@@ -67,13 +71,23 @@ function init_verlet_integrator(pendulum, t, gravity) {
 
 function set_PID_parameters(pendulum) {
   // STENCIL: change pid parameters
-  pendulum.servo = { kp: 0, kd: 0, ki: 0 }; // no control
+  pendulum.servo = { kp: 0.5, kd: 70, ki: 0.02 }; // no control
+  pendulum.servo.error = 0;
   return pendulum;
 }
 
 function PID(pendulum, accumulated_error, dt) {
   // STENCIL: implement PID controller
   // return: updated output in pendulum.control and accumulated_error
+  var p_term = pendulum.desired - pendulum.angle;
+  var d_term = p_term - pendulum.servo.error;
 
+  pendulum.servo.error = d_term;
+  accumulated_error = p_term + accumulated_error;
+  console.log(pendulum.servo.error);
+  pendulum.control =
+    pendulum.servo.kp * p_term +
+    pendulum.servo.ki * accumulated_error +
+    pendulum.servo.kd * d_term;
   return [pendulum, accumulated_error];
 }
