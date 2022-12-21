@@ -193,8 +193,8 @@ kineval.robotDraw = function drawRobot() {
 
     // display robot endeffector
     endeffector_mat = [];
-    if (kineval.params.ik_orientation_included)
-        endeffector_mat = matrix_2Darray_to_threejs(matrix_multiply(robot.joints[robot.endeffector.frame].xform,generate_translation_matrix(robot.endeffector.position[0],robot.endeffector.position[1],robot.endeffector.position[2])));
+    if (kineval.params.ik_orientation_included){
+        endeffector_mat = matrix_2Darray_to_threejs(matrix_multiply(robot.joints[robot.endeffector.frame].xform,generate_translation_matrix(robot.endeffector.position[0],robot.endeffector.position[1],robot.endeffector.position[2])));}
     else {
         endeffector_world = matrix_multiply(robot.joints[robot.endeffector.frame].xform,robot.endeffector.position);
         endeffector_mat = matrix_2Darray_to_threejs(generate_translation_matrix(endeffector_world[0],endeffector_world[1],endeffector_world[2]));
